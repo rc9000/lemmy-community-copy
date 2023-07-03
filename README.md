@@ -4,7 +4,8 @@ Uses the `lemmy-js-client` library to synchronise communities (subs) between two
 
 ## Usage
 
-    git clone https://github.com/rc9000/lemmy-community-copy.git && cd lemmy-community-copy && npm install
+    git clone https://github.com/rc9000/lemmy-community-copy.git \
+        && cd lemmy-community-copy && npm install
 
     ./node_modules/.bin/ts-node main.ts \
         --from-url 'https://sh.itjust.works' --from-username 'userA' --from-password 'abc' \
