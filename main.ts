@@ -34,7 +34,7 @@ async function fetchCommunities(client: LemmyHttp, jwt: string, type_: "Subscrib
     let c = await client.listCommunities({limit: pagesize, auth: jwt, type_, page: currpage, sort: "Old" });
 
     if (c.communities.length == 0){
-      log.debug(`list of communities exhausted`);
+      log.debug(`no more data in page`);
       break;
     }
 
@@ -60,7 +60,7 @@ async function fetchCommunities(client: LemmyHttp, jwt: string, type_: "Subscrib
     let destMap: { [key: string]:  Community;  } = {}; 
 
     for (const community of destCommunities) {
-      log.debug(`TO: has ${community.actor_id} with id ${community.id}` );
+      log.debug(`TO: ${community.actor_id} has id ${community.id}` );
       destMap[community.actor_id] = community; 
     }
 
@@ -69,7 +69,7 @@ async function fetchCommunities(client: LemmyHttp, jwt: string, type_: "Subscrib
     for (const s of subs) {
       let t = destMap[s.actor_id];
       if (t){
-        log.info(`following ${s.actor_id} on ${opt.toUrl} with id ${t.id}`);
+        log.info(`following ${s.actor_id} on TO with id ${t.id}`);
         let fres = await clientTo.followCommunity({ auth: jwtTo.jwt!, community_id: t.id, follow: true});
       }else{
         // I'm sure there is an API-based way to do that, FIXME
