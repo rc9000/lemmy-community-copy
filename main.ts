@@ -3,7 +3,6 @@ import log from 'loglevel';
 import { Command } from 'commander';
 const program = new Command();
 
-log.setLevel("debug");
 let pagesize = 30;
 let maxpages = 1000;
 
@@ -14,9 +13,11 @@ program
   .requiredOption('--to-url <toUrl>', 'URL of the destination instance')
   .requiredOption('--to-username <toUsername>', 'Username for the destination instance')
   .requiredOption('--to-password <toPassword>', 'Password for the destination instance')
+  .option('--loglevel <level>', 'Loglevel: debug/info/warn')
   .parse(process.argv);
 
 const opt = program.opts();
+log.setLevel(opt.loglevel ? opt.loglevel : "debug");
 
 let clientFrom: LemmyHttp = new LemmyHttp(opt.fromUrl);
 let loginFormFrom: Login = { username_or_email: opt.fromUsername, password: opt.fromPassword };
@@ -26,6 +27,8 @@ let loginFormTo: Login = { username_or_email: opt.toUsername, password: opt.toPa
 
 (async () => {
   try {
+
+    log.info(`\n\nlogging into ${opt.fromUrl} to list followed communities...\n\n`);
 
     let subs: Community[] = [];
     let jwtFrom = await clientFrom.login(loginFormFrom);
@@ -51,6 +54,8 @@ let loginFormTo: Login = { username_or_email: opt.toUsername, password: opt.toPa
 
     currpage = 1;
 
+    log.info(`\n\nlogging into ${opt.toUrl} to list communities...\n\n`);
+
     let jwtTo = await clientTo.login(loginFormTo);
     let destCommunitites: Community[] = [];
     let destMap: { [key: string]:  Community;  } = {}; 
@@ -64,7 +69,7 @@ let loginFormTo: Login = { username_or_email: opt.toUsername, password: opt.toPa
       }
 
       for (const community of cTo.communities) {
-        log.info(`TO: has ${community.community.actor_id} with id ${community.community.id}` );
+        log.debug(`TO: has ${community.community.actor_id} with id ${community.community.id}` );
         destCommunitites.push(community.community);
         destMap[community.community.actor_id] = community.community; 
       }
@@ -72,14 +77,16 @@ let loginFormTo: Login = { username_or_email: opt.toUsername, password: opt.toPa
       currpage++;
     }
 
+    log.info(`\n\nfollowing communities on ${opt.toUrl}...\n\n`);
+
     for (const s of subs) {
       let t = destMap[s.actor_id];
       if (t){
-        log.info(`subbing to ${s.actor_id} on FROM with id ${t.id}`);
+        log.info(`following ${s.actor_id} on FROM with id ${t.id}`);
         let fres = await clientTo.followCommunity({ auth: jwtTo.jwt!, community_id: t.id, follow: true});
       }else{
         // I'm sure there is an API-based way to do that, FIXME
-        log.error(`FIXME: community ${s.actor_id} missing on TO - search for it on ${opt.toUrl} to make known to instance`);
+        log.error(`FIXME: community ${s.actor_id} missing on TO - to make known to instance, search for it with ${opt.toUrl}/search?q=${s.actor_id}`);
       }
     }
 
