@@ -13,7 +13,8 @@ Uses the `lemmy-js-client` library to synchronise communities (subs) between two
 
 Afterwards, `userB` will follow all communities available on the `to-url` instance. Watch out for output lines like this:
 
-    FIXME: community https://dataterm.digital/c/cyberpunk missing on TO - to make known to instance, search for it with https://feddit.de/search?q=https://dataterm.digital/c/cyberpunk
+    FIXME: community https://dataterm.digital/c/cyberpunk missing on TO \
+      - to make known to instance, search for it with https://feddit.de/search?q=https://dataterm.digital/c/cyberpunk
 
 This means that the community does not yet have an id in the target instance. Just searching for it by copying the link into your browser (while logged in into the `to-url` instance) should fix it. There is certainly an automated way to do this, but I haven't gotten around to look into it.
 
