@@ -8,7 +8,7 @@ Uses the `lemmy-js-client` library to synchronise communities (subs) between two
 
     ./node_modules/.bin/ts-node main.ts --from-url 'https://sh.itjust.works' --from-username 'userA' --from-password 'abc' --to-url 'https://feddit.de' --to-username 'userB' --to-password 'xyz'
 
-Afterwards, `userB` will follow all communities available on the "to-url" instance. Watchout for output lines like this:
+Afterwards, `userB` will follow all communities available on the "to-url" instance. Watch out for output lines like this:
 
     FIXME: community https://sh.itjust.works/c/best_of_mastodon missing on TO - search for it on https://feddit.de to make known to instance
 
