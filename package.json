@@ -1,0 +1,17 @@
+{
+  "name": "lemmy-community-copy",
+  "version": "0.0.1",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "^11.0.0",
+    "lemmy-js-client": "^0.18.1-rc.2",
+    "loglevel": "^1.8.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.6"
+  }
+}

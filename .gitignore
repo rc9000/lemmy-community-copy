@@ -1,0 +1,37 @@
+# Dependency directories
+/node_modules
+/.pnp
+.pnp.js
+
+# TypeScript build output
+/dist
+/out
+
+# IDE files
+/.vscode
+/.idea
+/.DS_Store
+
+# Log files
+/*.log
+
+# Environment variables file
+.env
+
+# Compiled JavaScript files
+*.js
+
+# Compiled TypeScript declaration files
+*.d.ts
+
+# Build artifacts
+/build
+
+# macOS folder attributes
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
