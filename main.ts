@@ -25,56 +25,43 @@ let loginFormFrom: Login = { username_or_email: opt.fromUsername, password: opt.
 let clientTo: LemmyHttp = new LemmyHttp(opt.toUrl);
 let loginFormTo: Login = { username_or_email: opt.toUsername, password: opt.toPassword };
 
-(async () => {
-  try {
+async function fetchCommunities(client: LemmyHttp, jwt: string, type_: "Subscribed" | "All") {
+  let communities: Community[] = [];
+  let currpage = 1;
 
-    log.info(`\n\nlogging into ${opt.fromUrl} to list followed communities...\n\n`);
+  while (currpage <= maxpages){
+    log.debug(`fetching page ${currpage} of ${maxpages}`);
+    let c = await client.listCommunities({limit: pagesize, auth: jwt, type_, page: currpage, sort: "Old" });
 
-    let subs: Community[] = [];
-    let jwtFrom = await clientFrom.login(loginFormFrom);
-
-    let currpage = 1;
-
-    while (currpage <= maxpages){
-      log.debug(`Looking at subscription page ${currpage} of ${maxpages}`);
-      let c = await clientFrom.listCommunities({limit: pagesize, auth: jwtFrom.jwt, type_: "Subscribed", page: currpage, sort: "Old" });
-
-      if (c.communities.length == 0){
-        log.debug(`list of communities exhausted`);
-        break;
-      }
-
-      for (const community of c.communities) {
-        log.info(`FROM: subscribed to ${community.community.actor_id}`);
-        subs.push(community.community);
-      }
-
-      currpage++;
+    if (c.communities.length == 0){
+      log.debug(`list of communities exhausted`);
+      break;
     }
 
-    currpage = 1;
+    communities.push(...c.communities.map(community => community.community));
+
+    currpage++;
+  }
+  
+  return communities;
+}
+
+(async () => {
+  try {
+    log.info(`\n\nlogging into ${opt.fromUrl} to list followed communities...\n\n`);
+
+    let jwtFrom = await clientFrom.login(loginFormFrom);
+    let subs = await fetchCommunities(clientFrom, jwtFrom.jwt!, "Subscribed");
 
     log.info(`\n\nlogging into ${opt.toUrl} to list communities...\n\n`);
 
     let jwtTo = await clientTo.login(loginFormTo);
-    let destCommunitites: Community[] = [];
+    let destCommunities = await fetchCommunities(clientTo, jwtTo.jwt!, "All");
     let destMap: { [key: string]:  Community;  } = {}; 
 
-    while (currpage <= maxpages){
-      let cTo = await clientTo.listCommunities({limit: pagesize, auth: jwtTo.jwt, page: currpage, sort: "Old" });
-
-      if (cTo.communities.length == 0){
-        log.debug(`list of communities exhausted`);
-        break;
-      }
-
-      for (const community of cTo.communities) {
-        log.debug(`TO: has ${community.community.actor_id} with id ${community.community.id}` );
-        destCommunitites.push(community.community);
-        destMap[community.community.actor_id] = community.community; 
-      }
-
-      currpage++;
+    for (const community of destCommunities) {
+      log.debug(`TO: has ${community.actor_id} with id ${community.id}` );
+      destMap[community.actor_id] = community; 
     }
 
     log.info(`\n\nfollowing communities on ${opt.toUrl}...\n\n`);
@@ -82,7 +69,7 @@ let loginFormTo: Login = { username_or_email: opt.toUsername, password: opt.toPa
     for (const s of subs) {
       let t = destMap[s.actor_id];
       if (t){
-        log.info(`following ${s.actor_id} on FROM with id ${t.id}`);
+        log.info(`following ${s.actor_id} on ${opt.toUrl} with id ${t.id}`);
         let fres = await clientTo.followCommunity({ auth: jwtTo.jwt!, community_id: t.id, follow: true});
       }else{
         // I'm sure there is an API-based way to do that, FIXME
@@ -94,6 +81,3 @@ let loginFormTo: Login = { username_or_email: opt.toUsername, password: opt.toPa
     log.error(error);
   }
 })();
-
-
-
