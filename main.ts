@@ -17,7 +17,6 @@ program
   .parse(process.argv);
 
 const opt = program.opts();
-console.log(opt);
 
 let clientFrom: LemmyHttp = new LemmyHttp(opt.fromUrl);
 let loginFormFrom: Login = { username_or_email: opt.fromUsername, password: opt.fromPassword };
@@ -29,7 +28,6 @@ let loginFormTo: Login = { username_or_email: opt.toUsername, password: opt.toPa
   try {
 
     let subs: Community[] = [];
-    let subMap: { [key: string]:  Community;  } = {}; 
     let jwtFrom = await clientFrom.login(loginFormFrom);
 
     let currpage = 1;
@@ -44,9 +42,8 @@ let loginFormTo: Login = { username_or_email: opt.toUsername, password: opt.toPa
       }
 
       for (const community of c.communities) {
-        log.info(`FROM: adding ${community.community.actor_id}`);
+        log.info(`FROM: subscribed to ${community.community.actor_id}`);
         subs.push(community.community);
-        subMap[community.community.actor_id] = community.community; 
       }
 
       currpage++;
@@ -67,8 +64,7 @@ let loginFormTo: Login = { username_or_email: opt.toUsername, password: opt.toPa
       }
 
       for (const community of cTo.communities) {
-        log.info(`TO: adding ${community.community.actor_id}`);
-        //log.debug(`community.community.id ${community.community.id}`);
+        log.info(`TO: has ${community.community.actor_id} with id ${community.community.id}` );
         destCommunitites.push(community.community);
         destMap[community.community.actor_id] = community.community; 
       }
@@ -79,12 +75,12 @@ let loginFormTo: Login = { username_or_email: opt.toUsername, password: opt.toPa
     for (const s of subs) {
       let t = destMap[s.actor_id];
       if (t){
-        console.log(`subbing to ${s.actor_id} on FROM with id ${t.id}`);
+        log.info(`subbing to ${s.actor_id} on FROM with id ${t.id}`);
         let fres = await clientTo.followCommunity({ auth: jwtTo.jwt!, community_id: t.id, follow: true});
       }else{
-        console.log(`community ${s.actor_id} missing on TO - search for it to federate with instance`);
+        // I'm sure there is an API-based way to do that, FIXME
+        log.error(`FIXME: community ${s.actor_id} missing on TO - search for it on ${opt.toUrl} to make known to instance`);
       }
-
     }
 
   } catch (error) {
