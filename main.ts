@@ -3,8 +3,6 @@ import log from 'loglevel';
 import { Command } from 'commander';
 const program = new Command();
 
-let pagesize = 30;
-let maxpages = 1000;
 
 program
   .requiredOption('--from-url <fromUrl>', 'URL of the source instance')
@@ -13,15 +11,18 @@ program
   .requiredOption('--to-url <toUrl>', 'URL of the destination instance')
   .requiredOption('--to-username <toUsername>', 'Username for the destination instance')
   .requiredOption('--to-password <toPassword>', 'Password for the destination instance')
-  .option('--loglevel <level>', 'Loglevel: debug/info/warn')
+  .option('--loglevel <level>', 'Loglevel: debug/info/warn', "debug")
+  .option('--maxpages <number>', 'Max pages to request while getting communities', "1000")
+  .option('--pagesize <number>', 'Entries per page to request while getting communities', "30")
   .parse(process.argv);
 
 const opt = program.opts();
 log.setLevel(opt.loglevel ? opt.loglevel : "debug");
+let pagesize = opt.pagesize;
+let maxpages = opt.maxpages;
 
 let clientFrom: LemmyHttp = new LemmyHttp(opt.fromUrl);
 let loginFormFrom: Login = { username_or_email: opt.fromUsername, password: opt.fromPassword };
-
 let clientTo: LemmyHttp = new LemmyHttp(opt.toUrl);
 let loginFormTo: Login = { username_or_email: opt.toUsername, password: opt.toPassword };
 
@@ -30,7 +31,7 @@ async function fetchCommunities(client: LemmyHttp, jwt: string, type_: "Subscrib
   let currpage = 1;
 
   while (currpage <= maxpages){
-    log.debug(`fetching page ${currpage} of ${maxpages}`);
+    log.debug(`fetching page ${currpage} of up to ${maxpages}`);
     let c = await client.listCommunities({limit: pagesize, auth: jwt, type_, page: currpage, sort: "Old" });
 
     if (c.communities.length == 0){
@@ -39,7 +40,6 @@ async function fetchCommunities(client: LemmyHttp, jwt: string, type_: "Subscrib
     }
 
     communities.push(...c.communities.map(community => community.community));
-
     currpage++;
   }
   
