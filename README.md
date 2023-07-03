@@ -1,6 +1,6 @@
 # Lemmy Community-Following Synchronizer
 
-Uses the `lemmy-js-client` library to synchronise communities (subs) between two instances of Lemmy, a free, open-source and federated link aggregation platform. 
+Uses the `lemmy-js-client` library to synchronise followed communities (subs) between two [Lemmy](https://join-lemmy.org/) accounts. 
 
 ## Usage
 
