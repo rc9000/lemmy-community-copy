@@ -20,6 +20,8 @@ This means that the community does not yet have an id in the target instance. Ju
 
 
 
+## Similar Tools
 
+https://github.com/Ac5000/lemmy_account_sync is pretty similar but has more traction + features, so I highly recommend improving and contributing to Ac5000's work instead. 
 
 
